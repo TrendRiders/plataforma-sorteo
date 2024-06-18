@@ -1,0 +1,17 @@
+/* Estilos para los botones de clase X */
+.button.sorteo-button {
+    background-color: #4CAF50; /* Color de fondo */
+    color: white; /* Color del texto */
+    border: none; /* Eliminar borde */
+    padding: 10px 20px; /* Espaciado interno */
+    text-align: center; /* Centrar el texto */
+    text-decoration: none; /* Quitar subrayado del texto */
+    display: inline-block; /* Mostrar como elemento en línea */
+    font-size: 16px; /* Tamaño de la fuente */
+    border-radius: 5px; /* Borde redondeado */
+}
+
+/* Efecto hover para los botones de clase X */
+.button.sorteo-button:hover {
+    background-color: #45a049; /* Cambiar el color de fondo en hover */
+}

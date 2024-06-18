@@ -1,0 +1,148 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+  %}
+
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        var currentSorteoButton = null;
+
+
+        $(document).ready(function(){
+            $("#btn-sortear").click(function(){
+                $.ajax({
+                    url: "/uploader",
+                    type: "POST",
+                    data: $("form").serialize(),
+                    success: function(data){
+                        $("#resultados").empty();
+                        $.each(data, function(index, value){
+                            $("#resultados").append("<p>" + value.Numero + ": " + value.Nombre + " (ID de participación: " + value.ID_Participacion + ")</p>");
+                        });
+                    }
+                });
+            });
+        });
+
+      $(document).ready(function() {
+      // Delegación de eventos para botones de sorteo
+      $(document).on("click", ".sorteo-button", function() {
+          // Almacena el botón del sorteo actual en la variable global
+          currentSorteoButton = $(this);
+          
+          var buttonIndex = $(this).data('index');  // Obtener el índice del botón
+          $.ajax({
+              type: 'POST',
+              url: '/display_sorteo',
+              data: {'button_index': buttonIndex},
+              success: function(response) {
+                // Manejar la respuesta si es necesario
+                $("#resultados").empty(); // Limpiar resultados anteriores
+                $.each(response, function(index, value){
+                    $("#resultados").append("<p>" + value.Numero + ": " + value.Nombre + " (ID de participación: " + value.ID_Participacion + ")</p>");
+                });
+
+                // Después de mostrar los resultados, dibuja el botón de borrar
+                $("#resultados").append('<button onclick="borrarSorteo()">Borrar Sorteo</button>');
+              },
+              error: function(xhr, status, error) {
+                  console.error("Error al procesar la solicitud:", error);
+              }
+              });
+          });
+      });
+    
+  
+    // Función para borrar el sorteo actual
+    function borrarSorteo() {
+        if (confirm("¿Estás seguro de que deseas borrar este sorteo?")) {
+            // Obtener el índice del botón del sorteo actual
+            var buttonIndex = currentSorteoButton.data('index');
+            // Llamar a la función en el backend para borrar el sorteo
+            $.ajax({
+                type: 'POST',
+                url: '/borrar-sorteo',
+                data: {'button_index': buttonIndex},
+                success: function(response) {
+                    alert(response.message); // Mostrar el mensaje de éxito
+                    $(".sorteo-button[data-index='" + buttonIndex + "']").remove();
+                    window.location.href = '/'
+                    //location.reload()
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al borrar el sorteo:", error);
+                }
+            });
+            
+            ;
+
+        }
+    }
+</script>
+
+  <h1 align="center">Sorteos</h1>
+  <form action = "http://127.0.0.1:5000/uploader" method="POST" enctype = "multipart/form-data">
+
+    <div align="center">
+      <label align="left">Fecha inicial</label>
+      <input type="date" name="init_date" title="Fecha inicial" >
+    </div>
+
+    <div align="center">
+      <label align="left">Fecha final</label>
+      <input type="date" name="end_date" title="Fecha final" >
+    </div>
+
+    <div style="height: 20px;"></div>
+
+    <div align="center">
+          <input type = "file" name = "file" accept=".csv"/>
+    </div>
+    <div style="height: 20px;"></div>
+
+    <div align="center">
+      <label align="center">Cantidad de sorteados</label>
+      <input type="number" name="num_sorteados"  min="1"><br><br>
+    </div>
+
+    <div align="center">
+      <label align="center">Nombre del sorteo</label>
+      <input type="text" name="nom_sorteo"><br><br>
+    </div>
+  
+    <div align="center">
+      <button type="submit" class="btn btn-primary">Crear Sorteo</button>
+    </div>
+
+  </form>
+
+  <div style="height: 30px;"></div>
+
+  <div align="center" id="sorteos">
+    {% if sorteos %}
+        {% for index in sorteos %}
+            <button class="sorteo-button" data-index="{{ index }}">{{ index }}</button>
+        {% endfor %}
+    {% endif %}
+  </div>
+
+
+  <div style="height: 20px;"></div>
+
+
+  <div align="center" id="resultados" data-sorteo-id="{{ sorteo_id }} ">
+    {% if sorteados %}
+        {% for resultado in sorteados %}
+            <p>{{ resultado.Numero }}: {{ resultado.Nombre }} (ID : {{ resultado.ID_Participacion }})</p>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div style="height: 50px;"></div>
+
+
+
+
+
+  {% endblock %}
