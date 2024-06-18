@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from datetime import datetime
 from .models import Note
 from . import db
 import pandas as pd
 import json
+import time
+import os
 from . import db_mongo   ##means from __init__.py import db
 
 views = Blueprint('views', __name__)
@@ -38,6 +40,7 @@ def delete_note():
             db.session.commit()
 
     return jsonify({})
+
 
 
 @views.route('/uploader', methods=['POST'])
@@ -84,17 +87,39 @@ def upload_file():
             df_sorteados = df_sorteados._append(df_filtrado[df_filtrado['ID'] == reg['id_participacion']] )  # Agregar el registro correspondiente a df_sorteados
 
 
-        df_sorteados.to_csv('aux_file.csv', index=False)
+        df_sorteados.to_csv('website/static/sorteo.csv', index=False)
         
         sorteos = None
 
         cant_doc = get_size_bd()
 
-        guardar_sorteo_bd('aux_file.csv', id_sorteo)
-
+        guardar_sorteo_bd('website/static/sorteo.csv', id_sorteo)
+        
         print(result_sorteados)
+
         
     return render_template("home.html", user=current_user, sorteos=get_ids(), sorteados = result_sorteados)
+
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# Ruta completa del archivo
+FILE_PATH = os.path.join(BASE_DIR, 'aux_file.csv')
+
+@views.route('/download', methods=['POST'])
+def download_csv():
+    try:
+        # Nombre del archivo que deseas enviar
+        time.wait(5)
+        print("waiting")
+        filename = 'aux_file.csv'
+        # Ruta completa del archivo
+        file_path = os.path.join("", filename)
+        
+        # Envía el archivo CSV al cliente
+        return send_file(file_path, as_attachment=True)
+    except Exception as e:
+        return str(e)
+
 
 
 def get_size_bd():
@@ -141,7 +166,7 @@ def handle_button_click():
         cant_doc = get_size_bd()
 
         for indice, fila in df.iterrows():
-            sorteados.append({'Numero': count, 'Nombre': fila['Name'], 'ID_Participacion': fila['ID']})
+            sorteados.append({'Numero': count, 'Nombre': fila['name'], 'ID_Participacion': fila['ID']})
             count+=1
         print(sorteados)
 
