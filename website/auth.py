@@ -47,6 +47,6 @@ def logout():
 
 
 def get_size_bd():
-    collection = db_mongo['sorteos']
+    collection = db_mongo['sorteos_ambrosoli']
     ids = [str(document['_id']) for document in collection.find({}, {'_id': 1})]
     return len(ids)
